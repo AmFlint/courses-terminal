@@ -7,6 +7,7 @@ Dans ce repository vous trouverez tous les supports de cours et TPs/Exercices pr
 ## Les thématiques
 
 - [Commandes basiques du terminal](./commandes-basiques)
+- [Git et GitHub](./git)
 
 ## Auteur
 
