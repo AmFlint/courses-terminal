@@ -29,12 +29,6 @@ Ensuite, on pourra utiliser la commande `git pull` pour télécharger sur notre 
 Dans ce TP, nous allons créer un repository sur Github, le télécharger sur notre ordinateur et commencer à intéragir avec.
 
 Pour cela nous pourrons:
-- Créer un fichier index.html
-- Écrire une structure simple (par exemple, un `h1` contenant une petite phrase)
-- Nous enverrons ces premières modifications sur le repository distant
-- Nous ajouterons par la suite un fichier de style `styles.css`, dans lequel nous donnerons une couleur au h1 `red`.
-- Nous changerons la phrase du titre
-- Nous pourrons par la suite envoyer ces nouvelles modifications sur le repository distant.
 
 - Connectez vous sur https://github.com
 - Créez un nouveau repository, appelez-le `tp-git`:
