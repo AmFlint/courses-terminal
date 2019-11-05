@@ -241,9 +241,57 @@ h1 {
 ```
 Ici, Git vous indique les différences qui ont été apportées en même temps sur la même ligne, entre des `marqueurs de conflits` (<<<<, =======, et >>>>>>).
 
-Vous devrez maintenant choisir quelle modification vous souhaitez conservé (`choisissez le pink`). **Vous pouvez ensutie supprimer les lignes comprenant des marqueurs de conflits, ainsi que l'une des lignes de color, pour n'en conserver qu'une seule**.
+Vous devrez maintenant choisir quelle modification vous souhaitez conservé (`choisissez le pink`). **Vous pouvez ensuite supprimer les lignes comprenant des marqueurs de conflits, ainsi que l'une des lignes de color, pour n'en conserver qu'une seule**.
 
 Une fois fait, vous pouvez simplement `git add`, `git commit` + `git push`.
 
 Rendez-vous sur votre Pull Request sur GitHub, le conflit est à présent réglé et vous pouvez merger vos modifications !
 
+
+## Un exercice pour tout résumer
+
+In teams of 2 - 4 collaborators:
+- Create a repository on Github (Set it to **public**), and invite every collaborators
+- Create a README.md in which you must specify:
+  - Each member of the team (First Name - Last Name)
+- Each collaborator will have to create the following feature:
+  - Create a new branch and call it `init-{lastname}`, {lastname} being the last name of the student writing the feature.
+  - create a file `page-{lastname}.html`, {lastname} being the last name of the student writing the feature.
+  - In the `html` file you just created, add the base `html` structure (DOCTYPE....), and a `h1` element, with the following title: `Git sum-up`.
+  - Create a first `commit` (git add, git commit) with these first modifications.
+  - Create a new file `styles-{lastname}.css`, add the following styles in this new file:
+    ```css
+    h1 {
+      color: blue;
+    }
+    ```
+  - Link you stylesheet to the `html` page you created previously (link element).
+  - As explained in previous exercises, it is a `best practice` to split your modifications in different commits, according to the kind of modifications done, in our case:
+    - `styles.css`: we created a stylesheet and added rules to change our h1 element's color.
+    - `html` structure: We linked our stylesheet into our HTML structure.
+  - Creating seperate commits for each modification makes it easier for other developers in the team to `review our code`, and track updates. It is a better way to organize our project, as a team. **So, please create two different commits:**
+    - In the first one, only add your stylesheet file, with a clear message about what you did
+    - In the second one, only add your HTML file.
+  - Push your modifications to GitHub (on your new branch).
+  - Go to your repository on github, create a `Pull Request` for your branch, and merge it in the main branch: `master`. Delete your branch once the Pull Request is merged: **Keep your repository clean by removing feature branches once you do not need them anymore**.
+  - Wait for every team member to complete these steps.
+
+In the second part, each developer will have to create a new feature. **First, everyone will have to `update his master branch (on local computer)`** (Remember to work on the latest version of the repository when possible, this will save you some headaches with conflicts and out-of-date code):
+- Change your current branch to master (checkout)
+- Pull recent modifications (git pull)
+
+Now, you should be up-to-date with the latest version of the repository, saved on Github.
+
+Now, for every developer:
+- Create a new branch and move to this branch (with checkout command), call it `add-subtitle-{lastname}`
+- Update your `page-{lastname}.html` file to add an `h2` element with content `This is my second feature with a team`
+- Update your `styles-{lastname}.css` file, to add some style for `h2` element: `color: pink`.
+- Create two separate commits:
+  - One about the HTML modification (added h2 element)
+  - The second one about the styles update
+- Push your work to your new branch
+- Go on Github, create a Pull Request, and Merge this PR to the master branch
+
+The goal of this exercise is to make you understand and remember the cycle we use to develop in a team, with Git and Github.
+
+We did run accross the main features and workflow elements to understand to start working with Git technology, but you will need some practice in real contexts (projects) to get used to it and develop a mastery for Git. You will face conflicts, which we barely covered in this course, but remember that conflicts can be solved very easily, sit next to your peer and work-out which part to keep or to change.
