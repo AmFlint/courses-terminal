@@ -1,4 +1,11 @@
-# Install Packets/Libraries
+# Learn to manage your environment (Computer)
+
+During this lecture, we will learn how to configure your local environment, with either Linux or MacOS. **Windows Users may use Ubuntu For Windows, which grants Linux abilities to a Windows Environment**.
+
+- Use package managers to install specific system packages/libraries on your computer
+- Configure a Web Server
+
+# Installing system packages/libraries
 
 Depending on your OS, you will have to use a specific way to install new system packets (for example, programming languages such as `php` or `node.js`, or Webservers like `apache` or `nginx`).
 
@@ -13,8 +20,9 @@ In this lecture, we will focus on both OS:
 - FileSystem commands
 - User and Permissions
 - Shell Variables
+- Addresses and Ports
 
-# Package Managers
+## Package Managers
 
 When we want to install a specific library on a computer/server, we will use a **Package Manager** most of the time.
 
@@ -129,6 +137,13 @@ export PATH="$PATH:/path/to/directory"
 # "$PATH:/path/to/directory" means add the content inside $PATH variable, and concatenate a string ":/path/to/directory" to it
 ```
 
+**Please Note that when you update the file, your Shell Session does not know it has been modified, so you need to reload the shell profile inside your shell session, with the command `source`:**
+```bash
+source .bash_profile
+# Or
+source .zshrc
+```
+
 ## TP - Install your first package: node.js
 
 The goal of this exercice is to install your first package, the `node.js` runtime, which allows you to run JavaScript programs inside your Terminal (and on Back-end Servers).
@@ -158,7 +173,117 @@ To run `node.js` programs (like you probably do in your Algorythm lectures):
 
 Now you can start writing your first programs with node.js, we used this package to illustrate how to install a package on your laptop, now we will install other packages such as `php`, `mysql` and `apache` as you will be using these packages during your backend course, with Aymeric Mayeux, and you will need to understand how your environment works, and how to set it up.
 
-## TP 2: Install PHP, MySQL and Apache
+## TP: Install PHP
+
+You will need to install PHP for Backend courses later in the semester. You will learn how to do it right now, during this exercise.
+
+PHP may be installed via:
+- `apt` on Linux (and Windows running Ubuntu For Windows)
+- `homebrew` on MacOS
+
+### Ubuntu (and Windows via Ubuntu For Windows)
+
+**On Ubuntu (and Windows via Ubuntu for Windows), you will have to install a package called `php-cli`**. (Many other PHP packages are available, and we will install these ones later on, but right now we only need PHP running as a Command Line Interface => `CLI`).
+
+Once you installed `php-cli` package, you may test your installation by running the following command:
+
+```bash
+php --version
+```
+
+### MacOS (with HomeBrew)
+
+On MacOS, the PHP language should already be installed, but we will install the latest version in this exercise.
+
+If the following command runs properly, it means that php is already installed on your laptop.
+```bash
+php --version
+# On my Computer, it produces the following output
+PHP 7.1.23 (cli) (built: Feb 22 2019 22:19:32) ( NTS )
+Copyright (c) 1997-2018 The PHP Group
+Zend Engine v3.1.0, Copyright (c) 1998-2018 Zend Technologies
+```
+
+To know where PHP is installed, run:
+```bash
+which php
+# it should output the path to the default version of php already installed on your laptop
+/usr/bin/php
+```
+
+**On MacOS, please refer to [the official php brew package](https://formulae.brew.sh/formula/php#default)**.
+
+Now that you installed a newer version of PHP on your computer, you will have to override the already installed one (which will be used by default if you do not override).
+
+For example, run the command:
+```bash
+which php
+# It should output the same path as before: the default version installed on your computer
+/usr/bin/php
+```
+If you see the same path as previously, it means that all `php commands` you will run in the futur will use the old php program, instead of the new one you just installed. In order to override this behaviour, we will create an `alias`.
+
+**Open your Shell Profile file (either .zshrc or .bash_profile depending on your `echo $SHELL` output like explained above), at the bottom of the file, add the following line:
+```bash
+alias php="/usr/local/bin/php"
+```
+
+**Don't forget to reload the shell profile with command `source` like explained in above Section Shell Profiles**.
+
+Now if you run the command:
+```bash
+which php
+# Should output
+/usr/local/bin/php
+```
+
+And the php version should match the latest one we just installed:
+```bash
+php --version
+# Output
+PHP 7.3.11 (cli) (built: Oct 24 2019 11:29:52) ( NTS )
+Copyright (c) 1997-2018 The PHP Group
+Zend Engine v3.3.11, Copyright (c) 1998-2018 Zend Technologies
+    with Zend OPcache v7.3.11, Copyright (c) 1999-2018, by Zend Technologies
+```
+
+Congratulations, you just installed PHP and updated your Shell Profile to use the latest version.
+
+# Work With Web Servers (NGINX)
+
+The Web uses the network Protocol `HTTP` (over `TCP`) as its main communication protocol. It means that when you open `www.google.com` in your Web Browser, your browser application (Mozilla Firefox, Google Chrome, Internet Explorer...) sends a request (via the protocol `HTTP`) to the server (computer) behind `www.google.com`, which treats the request and sends back a response, displayed in your Web Browser.
+
+In order to serve a Website on the Internet, we need to use an application which handles `HTTP requests`, and return a response. The response will contain our `HTML page` (in case of a simple Website). Until now, you have been running your Web applications (.html files) in your browser, which understands the HTML Markup language, and display elements.
+
+A Web Server allows your browser to `ask` for the .html page, the Web Server then sends the content of the .html file, your browser receives it and displays graphic elements.
+
+Later in the semester, you will start `Backend Courses` (PHP, MySQL), and you will need a Web Server Application to execute PHP Code, and send back responses to your clients (a Web Page, with dynamic content, for example a list of `posts` if you develop a Blog).
+
+You should have installed `php` on your computer during last Execise. With PHP, you may run a basic web server with the following command:
+```bash
+php -S <network-interface>:<port>
+# Do not worry about network interface and Port, we will talk about that during the lecture
+```
+**You Should place yourself in a directory with html files (with cd) before running the command above**.
+
+For example:
+```bash
+# Create a directory called my-first-server
+mkdir my-first-server
+# Create a file index.html and add a h1
+echo '<h1>Hello World</h1>' > index.html
+# Staret a php server
+php -S localhost:8000
+```
+
+In your Web Browser, open the link http://localhost:8000, you should see your title with the content `Hello, World`.
+You just ran your first Web Server with PHP, on your computer (`localhost` means run on your computer), on your network PORT 8000.
+
+## TP: Install and configure nginx
+
+In this exercise, we will learn how to install and configure one of the most-used Web Server on the market: [NGINX](https://www.nginx.com/).
+
+## TP: Install PHP, MySQL and Apache
 
 ### Introduction
 
