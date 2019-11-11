@@ -8,6 +8,7 @@ Dans ce repository vous trouverez tous les supports de cours et TPs/Exercices pr
 
 - [Commandes basiques du terminal](./commandes-basiques)
 - [Git et GitHub](./git)
+- [Installer des packets/librairies système](./linux/install-packets.md)
 
 ## Auteur
 
