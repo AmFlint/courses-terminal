@@ -35,6 +35,11 @@ For example, if I want to install `php` on my laptop, I will use my laptop's OS 
 
 When you first install a Debian-Linux Distribution on your laptop like `Debian` or `Ubuntu`, the `APT` package manager is automatically installed, and you may use its Command Line Interface (CLI) to install specific packages.
 
+Before installing any package with the `apt install` command described below, you have to update your system's apt cache with the following command:
+```bash
+apt update
+```
+
 ```bash
 apt install <package-name>
 
