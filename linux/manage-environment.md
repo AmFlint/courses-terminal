@@ -57,7 +57,7 @@ Usually, when you want to install a specific package, you might search for it on
 
 You can see that this link points to the official ubuntu website `doc.ubuntu-fr.org > git`.
 
-On the website, you usually find have an `Installation` section, describing the process to install `git` in the following example:
+On the website, you usually have an `Installation` section, describing the process to install `git` in the following example:
 ![install git](./assets/ubuntu-git.png)
 
 ### MacOS
@@ -275,6 +275,7 @@ For example:
 ```bash
 # Create a directory called my-first-server
 mkdir my-first-server
+cd my-first-server
 # Create a file index.html and add a h1
 echo '<h1>Hello World</h1>' > index.html
 # Staret a php server
@@ -284,11 +285,155 @@ php -S localhost:8000
 In your Web Browser, open the link http://localhost:8000, you should see your title with the content `Hello, World`.
 You just ran your first Web Server with PHP, on your computer (`localhost` means run on your computer), on your network PORT 8000.
 
+When you will deploy your websites, you should not use PHP's WebServer as it does not offer great performances (Not built for production). Instead, you should use Web Servers like [NGINX](https://www.nginx.com/) or the older [Apache](https://httpd.apache.org/).
+
 ## TP: Install and configure nginx
 
 In this exercise, we will learn how to install and configure one of the most-used Web Server on the market: [NGINX](https://www.nginx.com/).
 
-## TP: Install PHP, MySQL and Apache
+Install via:
+- [Linux/Ubuntu](https://doc.ubuntu-fr.org/nginx)
+- [MacOS via HomeBrew](https://formulae.brew.sh/formula/nginx#default)
+
+### Part 1: Install nginx
+
+#### Linux/Ubuntu
+
+Once you installed nginx with the `apt` command, you may check if the service is running with the following command:
+```bash
+systemctl status nginx
+# Should output the following content
+● nginx.service - A high performance web server and a reverse proxy server
+   Loaded: loaded (/lib/systemd/system/nginx.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2018-04-19 18:34:30 UTC; 1 years 6 months ago
+ Main PID: 19193 (nginx)
+    Tasks: 3
+   Memory: 6.4M
+      CPU: 59min 45.552s
+   CGroup: /system.slice/nginx.service
+           ├─ 5638 nginx: worker process
+           ├─ 5639 nginx: worker process
+           └─19193 nginx: master process /usr/sbin/nginx -g daemon on; master_process on
+```
+The mention `Active: active (running)` means that your Web Server is running properly: Open your web browser and go to the address http://localhost:80, you should see the default nginx page:
+![default nginx page](./assets/welcome_nginx.png)
+
+With Linux, `nginx`'s configuration is located inside `/etc/nginx/nginx.conf`. You can see the content of this file with the command:
+```bash
+cat /etc/nginx/nginx.conf
+```
+
+#### On MacOS
+
+To check that your nginx service is running, run the following command:
+```bash
+sudo brew services list
+# should output sommething like the following
+Name  Status  User Plist
+nginx stopped
+php   stopped
+```
+If Nginx is `stopped`, you  may start it using the command:
+```bash
+sudo brew services start nginx
+```
+
+Now, you should see nginx running:
+```bash
+sudo brew services list
+# Should output something like this
+Name  Status  User Plist
+nginx started root /Library/LaunchDaemons/homebrew.mxcl.nginx.plist
+php   stopped
+```
+
+Open your browser, use the address `localhost:8080`, you should see the default nginx page:
+![default page nginx](./assets/welcome_nginx.png)
+
+With MacOS, `nginx`'s configuration is located inside `/usr/local/etc/nginx/nginx.conf`. In your terminal, you can check the content of this file:
+```bash
+cat /usr/local/etc/nginx/nginx.conf
+```
+
+### Part 2: Configure NGINX
+
+We will see how to configure nginx to serve a specific folder of HTML files, to serve a website.
+
+Inside the nginx configuration file:
+- MacOS:
+  - `/usr/local/etc/nginx/nginx.conf`
+- Linux:
+  - `/etc/nginx/nginx.conf`: Main Configuration File
+  - `/etc/nginx/sites-enabled/default`: Base Webserver configuration file
+
+We will focus on different important directives on the `server` configuration:
+```bash
+server {
+        listen       8080;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+```
+- `listen <port>`: on which port of your computer the nginx server should listen for connections
+- `location`:
+  - `root`: The root of your webserver inside your file system, for example if you want to serve files inside `/home/myuser` (an index.html for example), you may change the configuration to: `root /home/myuser;`.
+
+In this exercise, we will configure NGINX Web server to manage your "Semaine Intensive d'Intégration".
+
+This way, you'll get used to basic Web Server features, and how to configure it.
+
+For this exercise, you will have to:
+- Clone last week's project on your computer
+- Configure NGINX's `root` to point on your project's directory (on your computer)
+- Configure NGINX `port` (`listen`) to use port 81.
+- Restart NGINX service to apply configuration:
+  - `sudo brew services restart nginx` on MacOS
+  - `sudo systemctl restart nginx` on Linux
+- Open your web browser on http://localhost:81, you should see your website if everything went well.
+
+### Part 3: Virtual Hosts
+
+A Web Server like `nginx` may handle multiple websites, above we worked on how to configure a simple `server` directive inside nginx's configuration to serve a specific directory, on a specific port.
+
+To serve multiple websites on the same nginx server, we will have to use `virtual hosts`. A Virtual Host is just a normal `nginx` configuration file, pointing to a specific directory on your computer, on a given PORT. We will add a specific attribute, to tell nginx in which case we want to use this configuration: the `server_name`.
+
+For example, if you want to handle two sites `test.com` (HTML files located in /home/user/test) and `testing.com` (HTML files located in /home/user/testing) behind the same `nginx server`, you can use two virtual hosts (two distincts configuration files):
+- One for `server_name: test.com`, with `root: /home/user/test` to serve HTML/CSS files from /home/user/test
+- One for `server_name: testing.com`, with `root: /home/user/testing` to serve HTML/CSS files from /home/user/testing
+
+When your nginx webserver receives a request for `http://test.com`, it will automatically load the file for test.com, the same goes for testing.com.
+
+For example, we could have the following configuration file for virtual host `test.com`:
+```conf
+server {
+  # On which port our application will listen
+  listen 80;
+  
+  # For which Domain name this configuration is valid
+  server_name: test.com;
+
+  # Document root: Where the HTML/CSS files are located
+  root /home/user/test;
+
+  # Which file to use as default page when opening website
+  # Here, we use index.html as default
+  index index.html;
+}
+```
+
+**Todo**
+
+
+<!-- ## TP: Install PHP, MySQL and Apache
 
 ### Introduction
 
@@ -299,5 +444,5 @@ In this Exercise, you will install and configure multiple system packages on you
 
 **Please Note that this is not a back-end class, but a system one, so we only talk a little bit about the usage of each of these packages, because you will learn how to write code during your back-end classes**.
 
-Each of these packages is available on Linux (via `apt`), MacOS (via `homebrew`) and Windows.
+Each of these packages is available on Linux (via `apt`), MacOS (via `homebrew`) and Windows. -->
 
