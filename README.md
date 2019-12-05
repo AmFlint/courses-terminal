@@ -9,6 +9,7 @@ Dans ce repository vous trouverez tous les supports de cours et TPs/Exercices pr
 - [Commandes basiques du terminal](./commandes-basiques)
 - [Git et GitHub](./git)
 - [Apprendre à Gérer son environnement](./linux/manage-environment.md)
+- [TP déployer son site en continu](./linux/tp-deploy.md)
 
 ## Auteur
 
