@@ -129,4 +129,124 @@ Il nous manque à présent une étape: exécuter le script de déploiement du si
 
 Pour cela, nous allons regarder les `Github Actions`, sorties très récemment: [Voir la documentation](https://github.com/features/actions).
 
-+ à venir sur le sujet....
+Avec Github Actions, on peut ajouter des évènements sur un repository publié sur GitHub, comme par exemple `au push sur la branche master`, ou `lorsqu'une Pull Request est ouverte`.
+
+On va ensuite pouvoir définir une liste d'actions à effectuer, notamment des commandes `shell`. Ces actions seront déclenchées lorsqu'un évènement est publié (`push sur master` par exemple).
+
+Pour commencer à travailler avec les Github actions, il faudra au préable créer un nouveau repository sur GitHub, puis aller dans l'onglet `Actions`:
+![actions](./assets/actions.png).
+
+Vous pourrez ensuite créer un workflow (bouton en haut à droite pour passer à la configuration du workflow).
+
+Une action est définie de la façon suivante:
+![description action](./assets/action-description.png)
+- On définie dans quelles circonstances ce workflow sera déclenché (dans cet exemple, à tous les `push` sur toutes les branches)
+- Sur quel système d'exploitation les commandes seront effectuées, ici on va utiliser le défaut: `ubuntu-latest` (Ubuntu Linux)
+- Les étapes à effectuer, on peut spécifier d'autres actions, ou encore des commandes Shell.
+
+**Notez que la première étape `actions/checkout@v1` est nécessaire: Elle sert à télécharger votre code dans le workflow, pour pouvoir effectuer des actions dessus (comme par exemple l'uploader sur votre serveur), comme Netlify**.
+
+L'objectif est simple: Sur chaque push sur la branche `master`: déployer le contenu du site.
+
+On peut donc imaginer un scénario similaire au scénario suivant:
+```yml
+name: Deploy Website
+
+# Déclencher le workflow uniquement au push sur la branche master (ou lorsqu'une Pull Request est mergée dans master)
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Deploy my website
+        run: # des commandes pour déployer le site
+```
+
+Pour que la commande `scp` fonctionne correctement, vous aurez besoins d'effectuer une étape avant d'uploader votre code sur le serveur.
+
+Rappelez vous la première fois que vous avez tenté de vous connecter en `ssh` au serveur fournis dans le TP: on vous a demandé si vous acceptiez la connexion à la machine. Ce processus se déclenche la première fois qu'on essaie de se connecter à un hôte distant avec le protocole SSH, et va donc arriver dans votre action.
+
+**Vous devrez donc au préalable exécuter une commande pour autoriser la connexion en SSH avec scp au serveur**. On peut le faire avec la commande suivante:
+```bash
+# Créer le dossier .ssh pour notre utilisateur (~/ veut dire le dossier de l'utilisateur sur lequel on est connecté)
+# C'est dans ce dossier que se trouve la configuration des hôtes autorisés avec SSH
+mkdir ~/.ssh
+
+# La commande ssh-keyscan permet de scanner une connexion avec le serveur donné
+# On redirige ensuite la sortie de cette commande vers le fichier "known_hosts". C'est dans ce fichier que le programme SSH va regarder pour établir une connexion avec un hôte vérifié.
+ssh-keyscan 163.172.172.180 >> ~/.ssh/known_hosts
+
+
+# On peut ensuite déployer notre site
+# Ici, de déploie mon site dans le dossier que j'ai crée précédemment pour ce TP: masselot-antoine
+sshpass -p <password> scp -r * tp@163.172.172.180:/home/tp/masselot-antoine
+```
+
+Vous pouvez bien évidemment utiliser ces commandes directement dans votre Github Action, n'oubliez pas d'installer sshpass au préalable (non installée par défault):
+```bash
+sudo apt update && sudo apt install -y sshpass
+```
+
+Vous pouvez définir vos étapes dans le fichier de workflow Github Actions:
+```yml
+# ......
+
+steps:
+  - uses: actions/checkout@v1
+  - name: Install SSHPASS
+    run: sudo apt update && sudo apt install -y sshpass
+  - name: Create .ssh directory
+    run: mkdir ~/.ssh
+  # ...
+```
+
+### Correction
+
+Dans cette correction, voici le fichier de configuration de la Github Action que l'on utilise pour automatiquement déployer notre site web lorsqu'on push sur la branche master:
+```yml
+name: CI
+
+on:
+  push:
+    branches: 
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install ssh pass
+      run: sudo apt update && sudo apt install -y sshpass
+    - name: create .ssh directory
+      run: mkdir ~/.ssh
+    - name: Verify Host via SSH
+      run: ssh-keyscan 163.172.172.180 >> ~/.ssh/known_hosts
+    - name: Deploy website
+      run: sshpass -p <password> scp -r * tp@163.172.172.180:/home/tp/masselot-antoine
+```
+
+**Notez que le système actuel possède une faille de sécurité: on passe le mot de passe écrit en clair**. On peut utiliser un système de secret avec Github Actions, ce qui nous permet de définir le mot de passe dans la configuration de notre repository (`settings`), et d'utiliser la valeur de ce secret dans notre action, sans divulguer le mot de passe.
+
+Pour résoudre ça:
+- Aller dans l'onglet `Settings` (ou `paramètres`) de votre répository sur Github
+- Dans l'onglet `Secrets` (sur la barre à gauche)
+- Créer un nouveau secret: `SSHPASS`, et mettez le contenu de votre mot de passe.
+- Remplacez dans votre action, la commande de déploiement par la commande suivante:
+  ```yml
+  # ...
+  - name: Deploy website
+    # L'option "-e" permet de spécifier que l'on souhaite utiliser la variable d'environnement nommée SSHPASS contenant notre mot de passe
+    run: sshpass -e scp -r * tp@163.172.172.180:/home/tp/masselot-antoine
+    env:
+      # utilise le secret crée précédemment pour injecter une variable d'environnement appelé SSHPASS
+      SSHPASS: ${{ secrets.SSHPASS }}
+  ```
+Ainsi, plus aucun problème de sécurité, votre code ne divulgue pas de mot de passe, puisqu'il utilise un `secret`, qui lui est spécifié dans la configuration de votre repository, chiffré.
