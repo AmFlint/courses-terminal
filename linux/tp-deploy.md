@@ -13,9 +13,11 @@ Cela vous permettra de mieux comprendre ce qu'il se passe sur netlify lorsque vo
 
 Dans ce TP, je vais vous fournir un serveur sur lequel vous pourrez vous connecter avec le protocole SSH pour l'administrer: Configurer NGINX, intéragir avec le système de fichier (vous créer un dossier), uploader le code source de votre site web, puis par la suite écrire un script d'automatisation du déploiement du site web.
 
+J'ai au préalable configuré un serveur Linux (Ubuntu 18.04) pour que chaque étudiant puisse se connecter sur un utilisateur. Chaque étudiant devra se connecter à un utilisateur `nom-prenom`, par exemple pour moi: `masselot-antoine` (vous verrez dans la suite du TP).
+
 ## Pré-requis
 
-- [Installer sshpass](https://gist.github.com/arunoda/7790979):
+- [Installer sshpass](https://gist.github.com/arunoda/7790979) (servira pour la partie bonus: automatisation):
   - `sudo apt install sshpass` sur Linux
   - `brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb` sur MacOS
 
@@ -30,33 +32,48 @@ Pour ce faire, nous utiliserons la commande `ssh`, qui se décompose comme suit:
 ssh <user>@<host>
 
 # Avec les données de ce tp:
-ssh tp@163.172.172.180
+ssh <nom-prenom>@163.172.130.135
+# Soit par exemple pour moi:
+ssh masselot-antoine@163.172.130.135
 # Le serveur vous demandera ensuite le mot de passe, tapez le mdp et appuyez sur la touche "entrer"
-tp@163.172.172.180's password:
+masselot-antoine@163.172.130.135's password:
 ```
 
 **Très important pour la partie `automatisation`: On peut utiliser le flag `-t` pour passer une commande à effectuer, sans avoir à se connecter**:
 ```bash
 # Ici, j'ouvre une connexion avec le serveur, je lance la commande ls /, et je ferme directement la connexion en une seule commande
-ssh tp@163.172.172.180 -t ls /
+ssh masselot-antoine@163.172.130.135 -t ls /
 ```
 
 Petit bémol de la commande `ssh`, le mot de passe vous sera demandé à nouveau, vous pouvez en revanche utiliser la commande `sshpass` pour contourner le problème (vous verrez dans les étapes à suivre, au niveau du script d'automatisation):
 ```bash
 # sshpass permet de passer le mot de passe en argument, puis de se connecter au serveur et exécuter une commande. Tout cela en une seule commande
-sshpass -p <le-mot-de-passe> ssh tp@163.172.172.180 -t ls /
+sshpass -p <le-mot-de-passe> ssh masselot-antoine@163.172.130.135 -t ls /
 ```
 
 
 ## Configurer le serveur Web NGINX
 
-Dans ce TP, un même serveur Linux est partagé entre tous les étudiants, je vous demanderai donc de bien vouloir:
-- Créer un dossier appelé `nom-prénom` dans `/home/tp`, par exemple: `mkdir /home/tp/masselot-antoine`. Vous pourrez uploader votre code à l'intérieur de ce dossier.
-- Créer un fichier de configuration pour `nginx` à l'emplacement `/etc/nginx/sites-enabled/nom-prénom`: par exemple `touch /etc.nginx/sites-enabled/masselot-antoine`. **Dans ce fichier, vous devrez impérativement définir les attributs**:
-  - `root`: Pointe sur votre dossier (/home/tp/masselot-antoine)
-  - `server_name`: Nom de domaine pour lequel la configuration sera appliquée. **Le server_name doit être sous le format `nom-prenom.mymutu.fr`,** par exemple `masselot-antoine.mymutu.fr`. Ensuite, notifiez moi pour que je puisse créer le nom de domaine en question.
-  - `listen 80;`: écouter sur le port 80 du serveur
+Dans ce TP, un même serveur Linux est partagé entre tous les étudiants, et chacun se connecte sur son propre utilisateur, avec son dossier de session dans `/home/<nom-prenom>` (par exemple `/home/masselot-antoine`).
+
+- Tout d'abord, créez un dossier `site` dans lequel vous allez ajouter un fichier `index.html` avec du contenu. Par la suite, nous uploaderons le contenu de votre site web depuis votre ordinateur, dans ce dossier. Et nous allons configurer le serveur web pour ouvrir les fichiers de ce dossier `site`.
+
+- Étant donné que tout le monde partage le même serveur Linux, j'ai installé le serveur web nginx, et je l'ai configuré pour utiliser les fichiers de configuration dans le dossier `nginx` de chacun des étudiants (par exemple `/home/masselot-antoine/nginx`). Vous devrez donc créer un fichier de configuration nginx pour votre site dans le dossier `nginx` de votre session. 
+Je vous conseille d'utiliser le fichier de configuration par défaut donné par nginx, puis modifiez le ensuite en fonction de votre besoin:
+  ```bash
+  # Je me trouve dans mon dossier utilisateur: /home/masselot-antoine
+  # Je rentre dans le dossier nginx
+  cd nginx
+
+  # Je peux copier le fichier default d'nginx pour écrire ma configuration dans mon dossier "nginx"
+  cp /etc/nginx/sites-enabled/default masselot-antoine
+  ```
+  **Dans ce fichier, vous devrez impérativement modifier les attributs**:
+  - `root`: Pointe sur votre dossier (par exemple pour moi `/home/masselot-antoine/site`)
+  - `server_name`: Nom de domaine pour lequel la configuration sera appliquée. **Le server_name doit être sous le format `nom-prenom.netlify.masselab.com`,** par exemple `masselot-antoine.netlify.masselab.com`. Ensuite, notifiez moi pour que je puisse créer le nom de domaine en question.
+  - `listen 80;`: écouter sur le port 80 du serveur (vérifiez bien que la mention `default_server` n'est pas présente)
   - `index`: préciser le fichier `index.html`
+
 
 **Pour vérifier que la configuration d'NGINX est correct avant de relancer le service, lancez la commande suivante**:
 ```bash
@@ -78,14 +95,14 @@ Maintenant, vous aurez besoins de prendre votre site, et de l'envoyer sur le ser
 # -r permet d'uploader un dossier et son contenu, sans le -r, la commande scp cherche à uploader un seul fichier et ne fonctionnera pas avec un dossier (le dossier contenant votre site)
 scp -r /chemin/vers/dossier/du/site <utilisateur>@<hôte>:/chemin/sur/instance
 
-# La commande suivante est chargée d'uploader un dossier "dossier-de-mon-site"
-# sur la machine avec l'IP 163.172.172.180 en tant qu'utilisateur "tp"
-# à l'emplacement /home/tp/masselot-antoine
-scp dossier-de-mon-site tp@163.172.172.180:/home/tp/masselot-antoine
+# La commande suivante est chargée d'uploader tous les fichiers (et dossiers) dans le dossier dans lequel je me trouve
+# sur la machine avec l'IP 163.172.130.135 en tant qu'utilisateur "masselot-antoine"
+# à l'emplacement /home/masselot-antoine/site
+scp -r * masselot-antoine@163.172.130.135:/home/masselot-antoine/site
 # Évidemment, vous devrez taper votre mot de passe
 ```
 
-Vérifiez bien que votre site a été copié au bon endroit sur le serveur, vous pourrez évidemment vérifier que le serveur web NGINX sert votre site correctement en vous connectant sur le site http://nom-prenom.mymutu.fr (remplacez nom-prenom par votre nom et prénom).
+Vérifiez bien que votre site a été copié au bon endroit sur le serveur, vous pourrez évidemment vous assurer que le serveur web NGINX sert votre site correctement en vous connectant sur le site http://nom-prenom.netlify.masselab.com (remplacez nom-prenom par votre nom et prénom).
 
 ## Automatisation du déploiement du site
 
@@ -122,6 +139,10 @@ bash monscript.sh
 Pour cette partie, vous devrez créer le script shell dans le dossier contenant votre site web.
 
 À l'exécution du script, le contenu de votre dossier (dans lequel se trouve votre site web) doit être uploadé sur le serveur donné, dans votre dossier personnel, ce qui mettra à jours le contenu de votre site web (puisque le serveur web va lire les fichiers présents dans votre dossier personnel).
+
+**L'idée: On écrit un script shell contenant les commandes nécessaires pour déployer le site (mettre en ligne une nouvelle version), on va ensuite le commit sur notre repository Git, afin que tous les membres du groupe (de project) puisse récupérer le script et l'utiliser**.
+
+Pour la partie Bonus, nous n'utiliserons pas ce script, mais plutôt les Github Actions, en spécifiant les commandes une par une, sans passer par un script shell.
 
 ## Bonus: Automatisation du déploiement au push sur Github
 
@@ -179,12 +200,12 @@ mkdir ~/.ssh
 
 # La commande ssh-keyscan permet de scanner une connexion avec le serveur donné
 # On redirige ensuite la sortie de cette commande vers le fichier "known_hosts". C'est dans ce fichier que le programme SSH va regarder pour établir une connexion avec un hôte vérifié.
-ssh-keyscan 163.172.172.180 >> ~/.ssh/known_hosts
+ssh-keyscan 163.172.130.135 >> ~/.ssh/known_hosts
 
 
 # On peut ensuite déployer notre site
 # Ici, de déploie mon site dans le dossier que j'ai crée précédemment pour ce TP: masselot-antoine
-sshpass -p <password> scp -r * tp@163.172.172.180:/home/tp/masselot-antoine
+sshpass -p <password> scp -r * masselot-antoine@163.172.130.135:/home/masselot-antoine/site
 ```
 
 Vous pouvez bien évidemment utiliser ces commandes directement dans votre Github Action, n'oubliez pas d'installer sshpass au préalable (non installée par défault):
@@ -228,9 +249,9 @@ jobs:
     - name: create .ssh directory
       run: mkdir ~/.ssh
     - name: Verify Host via SSH
-      run: ssh-keyscan 163.172.172.180 >> ~/.ssh/known_hosts
+      run: ssh-keyscan 163.172.130.135 >> ~/.ssh/known_hosts
     - name: Deploy website
-      run: sshpass -p <password> scp -r * tp@163.172.172.180:/home/tp/masselot-antoine
+      run: sshpass -p <password> scp -r * masselot-antoine@163.172.130.135:/home/masselot-antoine/site
 ```
 
 **Notez que le système actuel possède une faille de sécurité: on passe le mot de passe écrit en clair**. On peut utiliser un système de secret avec Github Actions, ce qui nous permet de définir le mot de passe dans la configuration de notre repository (`settings`), et d'utiliser la valeur de ce secret dans notre action, sans divulguer le mot de passe.
@@ -244,7 +265,7 @@ Pour résoudre ça:
   # ...
   - name: Deploy website
     # L'option "-e" permet de spécifier que l'on souhaite utiliser la variable d'environnement nommée SSHPASS contenant notre mot de passe
-    run: sshpass -e scp -r * tp@163.172.172.180:/home/tp/masselot-antoine
+    run: sshpass -e scp -r * masselot-antoine@163.172.130.135:/home/masselot-antoine/site
     env:
       # utilise le secret crée précédemment pour injecter une variable d'environnement appelé SSHPASS
       SSHPASS: ${{ secrets.SSHPASS }}

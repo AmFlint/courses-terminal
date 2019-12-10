@@ -432,6 +432,53 @@ server {
 
 **Todo**
 
+### Part PHP
+
+**On Linux, you will have to install the package [php-fpm](https://doc.ubuntu-fr.org/php) before going on**. On MacOS, php-fpm is already installed when you install php via homebrew.
+
+In order to execute PHP code, we will have to go through multiple steps:
+- configure `php-fpm`, set `cgi.fix_pathinfo=0`:
+  - `/etc/php-fpm/php.ini` on Linux
+  - `/usr/local/etc/php/7.4/php.ini` on MacOS
+  - Don't forget to restart your service:
+    - `sudo service php-fpm restart` on Linux
+    - `sudo brew services restart php` on Mac
+- configure nginx (like we did in above exercise) to use `fastcgi` (php-fpm) to read files (PHP and HTML code).
+
+Here is an example nginx configuration file to use `php-fpm` to execute PHP code on the server:
+```conf
+server {
+  listen 8080;
+
+  # Directory in which my .html/.php files are located
+  root /Users/antoinemasselot/my-first-server;
+
+  # Files to use as index on the server: index.php first
+  index index.php index.html;
+
+  # Update "location /" to "location ~ \.php" to handle connections to php files
+  location ~ \.php$ {
+
+      # try_files: Try to read a file called from URL, 
+      # example:  http://localhost:8080/test.php will try to read a file "test.php"
+      # if the file does not exist, web server will return a 404 not found error
+      try_files $uri =404;
+
+      # fastcgi_pass: where the php-fpm server is running (here, on my local computer on port 9000)
+      # by default: PHP-FPM listens on 9000
+      fastcgi_pass   127.0.0.1:9000;
+
+      # fastcgi_index: used for PHP to read the default file if nothing is provided (just like index)
+      # example: http://localhost:8080 => PHP reads index.php defined by this attribute
+      fastcgi_index  index.php;
+
+      # fascgi_param SCRIPT_FILENAME: Open php file
+      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+
+      include        fastcgi_params;
+  }
+}
+```
 
 <!-- ## TP: Install PHP, MySQL and Apache
 
