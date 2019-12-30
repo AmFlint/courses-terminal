@@ -11,6 +11,7 @@ Dans ce repository vous trouverez tous les supports de cours et TPs/Exercices pr
 - [Apprendre à Gérer son environnement](./linux/manage-environment.md)
 - [TP déployer son site en continu (Netlify maison)](./linux/tp-deploy.md)
 - [TP Déployer un site avec Wordpress: PHP/MySQL](./linux/tp-deploy-wordpress.md)
+- [TP Déployer une application front - back](./linux/tp-holidays)
 
 ## Auteur
 
