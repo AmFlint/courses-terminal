@@ -1,7 +1,7 @@
 # Évaluation
 
 - **Format de rendu**: un fichier au format `.sh` dans lequel vous écrirez les différentes instructions Shell pour résoudre l'exercice.
-- **Envoyer par mail** à amasselot@hetic.net avec:
+- **Envoyer par mail** à antoine.masselot@hetic.net avec:
   - Objet du mail: `TP Shell G2 NOM PRENOM`
   - En pièce jointe votre fichier contenant l'exercice avec la nomenclature suivante: `g2-nom-prenom.sh` et `g2-nom-prenom.txt`
 - Vous avez accès à Internet pendant l'épreuve, vous pouvez chercher la documentation en ligne mais pas communiquez entre vous.
