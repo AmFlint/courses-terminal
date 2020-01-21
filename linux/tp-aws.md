@@ -189,4 +189,6 @@ Maintenant que vous avez configuré votre serveur Linux, et installé les logici
 - [Déployer un site Statique (+ bonus refaire netlify maison)](./tp-deploy.md)
 - [Déployer un site Dynamique avec PHP, MySQL, Nginx et WordPress](./tp-deploy-wordpress.md)
 
-**Pour les plus avancés, vous pouvez vous orienter sur [ce TP effectué en Web2](https://github.com/AmFlint/courses-infrahosting/tree/master/tp-aws-ec2/)**.
+**Pour les plus avancés, vous pouvez vous orienter sur ces différents TPs, effectués en Web 2:**
+- [TP Déployer app front+back sur une seule instance AWS](./tp-holidays)
+- [TP Gérer un parc de serveurs pour déployer une application Front-Back sur AWS](https://github.com/AmFlint/courses-infrahosting/tree/master/tp-aws-ec2) (+ difficile)
