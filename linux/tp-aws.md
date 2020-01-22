@@ -13,7 +13,6 @@ Cela vous permettra de vous approprier les `bases` de la mise en ligne d'un appl
 ## Pré-requis
 
 - Créez un compte sur [AWS](https://aws.amazon.com/fr/).
-- [Installez Docker sur votre ordinateur](http://github.com/AmFlint/courses-docker/tree/master/tp-install-docker)
 
 ## Installer et configurer un serveur Linux
 
@@ -102,24 +101,6 @@ Maintenant que nous avons configuré les différentes ressources qui vont nous p
 - Validez la création de l'instance, pensez à choisir la clé `tp-aws` crée précédemment.
 - L'instance devrai à présent être en cours de création, nous allons pouvoir nous y connecté, une fois l'adresse IP assignée. Veuillez Copier l'adresse IP de votre instance:
   ![console ec2](./assets/ec2-create.png)
-
-<!-- ### Démarrer un serveur
-
-Ici, nous allons apprendre à configurer et démarrer une Machine Virtuelle (VM) dans le Cloud.
-
-**Partie à effectuer pour le TP**:
-- Dans l'onglet `Instances`, cliquez sur le bouton `Create an Instance`
-- Pour la configuration:
-  - Sélectionnez l'image `Ubuntu`: Système d'exploitation installé sur votre instance
-  - Sélectionnez `Paris` comme région: Il s'agit du pays où votre instance sera démarée
-  - Sélectionnez le type d'instance `DEV1-S` (onglet `Development`), il s'agit de la puissance de votre serveur (CPU, Mémoire et Stockage)
-  - Ne touchez pas la partie `Volumes`, il s'agit du stockage alloué à notre serveur
-  - Créez votre instance (en bas).
-
-Une fois l'instance prête, une `adresse IP` est assignée (**Public IP**):
-![instance info](./assets/instance_info.png)
-
-Vous pouvez ensuite copier votre IP, vous rendre dans votre terminal et vous connecter au serveur avec la commande SSH, que nous allons voir dans le prochain point. -->
 
 ### Se connecter à un serveur distant avec `SSH`
 
